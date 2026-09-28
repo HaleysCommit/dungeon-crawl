@@ -1,5 +1,7 @@
 # Dungeon Crawl — Unity Client
 
+![Dungeon Crawl splash screen](Assets/Art/Splash/dungeon_crawl_splash_screen.png)
+
 Unity game client for **Dungeon Crawl**, built on **TopDown Engine** (More Mountains) for
 gameplay, with wallet connect and onchain reward tracking against **Robinhood Chain
 Testnet** (chain id `46630`). This is the primary game client; it talks to the same
