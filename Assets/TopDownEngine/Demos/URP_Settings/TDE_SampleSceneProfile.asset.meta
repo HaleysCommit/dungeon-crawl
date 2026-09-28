@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 882cd1c81a094744bbf8d62d0e9a95ae
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 89636
+  packageName: TopDown Engine
+  packageVersion: 5.0
+  assetPath: Assets/TopDownEngine/Demos/URP_Settings/TDE_SampleSceneProfile.asset
+  uploadId: 958508

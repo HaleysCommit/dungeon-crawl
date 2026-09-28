@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 1eb1dbc31431c8646a457321e54a5f9b
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 89636
+  packageName: TopDown Engine
+  packageVersion: 5.0
+  assetPath: Assets/TopDownEngine/Demos/URP_Settings/TDE_Mobile_Renderer.asset
+  uploadId: 958508
