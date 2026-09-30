@@ -40,24 +40,16 @@ namespace DungeonCrawl.EditorTools
                 return;
             }
 
-            // Body
-            var cat = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-            cat.name = "Cat";
-            cat.transform.localScale = new Vector3(0.35f, 0.25f, 0.5f);
+            // Cat root (clean uniform scale, grounded)
+            var cat = new GameObject("Cat");
             cat.transform.position = player.transform.position - player.transform.forward * 1.5f;
+            cat.transform.localScale = Vector3.one;
 
-            var renderer = cat.GetComponent<Renderer>();
-            var catMat = new Material(Shader.Find("Universal Render Pipeline/Lit")) { color = CatColor };
-            renderer.sharedMaterial = catMat;
-
-            Object.DestroyImmediate(cat.GetComponent<CapsuleCollider>());
-
-            // placeholder collider sizing - retune once real (uniformly scaled) art replaces this capsule
             var controller = cat.AddComponent<CharacterController>();
-            controller.center = new Vector3(0f, 0.3f, 0f);
-            controller.radius = 0.3f;
-            controller.height = 0.6f;
-            controller.skinWidth = 0.02f;
+            controller.center = new Vector3(0f, 0.28f, 0f);
+            controller.radius = 0.26f;
+            controller.height = 0.55f;
+            controller.stepOffset = 0.25f;
 
             var companion = cat.AddComponent<CatCompanion>();
             var so = new SerializedObject(companion);
@@ -81,113 +73,190 @@ namespace DungeonCrawl.EditorTools
             so.FindProperty("missilesPerSalvo").intValue = 3;
             so.FindProperty("salvoInterval").floatValue = 0.12f;
             so.FindProperty("missileDamage").floatValue = 22f;
-            so.ApplyModifiedPropertiesWithoutUndo();
 
-            // Visual elements
-            var furMat = AssetDatabase.LoadAssetAtPath<Material>("Assets/Art/Cat/CatFur_Mat.mat");
-            var faceMat = AssetDatabase.LoadAssetAtPath<Material>("Assets/Art/Cat/CatFaceOverlay_Mat.mat");
-            var pinkMat = AssetDatabase.LoadAssetAtPath<Material>("Assets/Art/Cat/CatPink_Mat.mat");
-            var whiteMat = AssetDatabase.LoadAssetAtPath<Material>("Assets/Art/Cat/CatWhitePaw_Mat.mat");
-            var iconSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Cat/CatOverheadIcon.png");
+            // Load materials and mesh
+            const string artDir = "Assets/Art/Cat/";
+            var tabbyMat = AssetDatabase.LoadAssetAtPath<Material>(artDir + "ChibiCat_Tabby_Mat.mat");
+            var faceMat = AssetDatabase.LoadAssetAtPath<Material>(artDir + "ChibiCat_Face_Mat.mat");
+            var crownMat = AssetDatabase.LoadAssetAtPath<Material>(artDir + "PrincessCrown_Mat.mat");
+            var rubyMat = AssetDatabase.LoadAssetAtPath<Material>(artDir + "CrownRuby_Mat.mat");
+            var pawMat = AssetDatabase.LoadAssetAtPath<Material>(artDir + "ChibiCat_Paw_Mat.mat");
+            var earMat = AssetDatabase.LoadAssetAtPath<Material>(artDir + "ChibiCat_InnerEar_Mat.mat");
+            var crownMesh = AssetDatabase.LoadAssetAtPath<UnityEngine.Mesh>(artDir + "PrincessCrownMesh.asset");
+            var missileMat = AssetDatabase.LoadAssetAtPath<Material>("Assets/Prefabs/MagicMissile_Mat.mat");
+            var iconSprite = AssetDatabase.LoadAssetAtPath<Sprite>(artDir + "CatOverheadIcon.png");
 
-            if (furMat != null) renderer.sharedMaterial = furMat;
-
+            // Build CatVisuals Root
             var visuals = new GameObject("CatVisuals");
             visuals.transform.SetParent(cat.transform, false);
 
-            // Head
-            var head = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            head.name = "CatHead";
-            head.transform.SetParent(visuals.transform, false);
-            head.transform.localPosition = new Vector3(0f, 0.35f, 0.28f);
-            head.transform.localScale = new Vector3(0.38f, 0.34f, 0.34f);
-            Object.DestroyImmediate(head.GetComponent<Collider>());
-            if (furMat != null) head.GetComponent<Renderer>().sharedMaterial = furMat;
+            // BodyRoot
+            var bodyRoot = new GameObject("BodyRoot");
+            bodyRoot.transform.SetParent(visuals.transform, false);
+            bodyRoot.transform.localPosition = new Vector3(0f, 0.25f, 0f);
 
-            // Snout
+            var torso = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            torso.name = "TorsoMesh";
+            torso.transform.SetParent(bodyRoot.transform, false);
+            torso.transform.localScale = new Vector3(0.32f, 0.26f, 0.44f);
+            Object.DestroyImmediate(torso.GetComponent<Collider>());
+            if (tabbyMat != null) torso.GetComponent<Renderer>().sharedMaterial = tabbyMat;
+
+            var chestBib = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            chestBib.name = "ChestBib";
+            chestBib.transform.SetParent(bodyRoot.transform, false);
+            chestBib.transform.localPosition = new Vector3(0f, -0.04f, 0.12f);
+            chestBib.transform.localScale = new Vector3(0.26f, 0.20f, 0.22f);
+            Object.DestroyImmediate(chestBib.GetComponent<Collider>());
+            if (pawMat != null) chestBib.GetComponent<Renderer>().sharedMaterial = pawMat;
+
+            // HeadRoot
+            var headRoot = new GameObject("HeadRoot");
+            headRoot.transform.SetParent(bodyRoot.transform, false);
+            headRoot.transform.localPosition = new Vector3(0f, 0.11f, 0.18f);
+
+            var headMesh = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            headMesh.name = "HeadMesh";
+            headMesh.transform.SetParent(headRoot.transform, false);
+            headMesh.transform.localScale = new Vector3(0.38f, 0.32f, 0.32f);
+            Object.DestroyImmediate(headMesh.GetComponent<Collider>());
+            if (tabbyMat != null) headMesh.GetComponent<Renderer>().sharedMaterial = tabbyMat;
+
+            var cheekL = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            cheekL.name = "Cheek_L";
+            cheekL.transform.SetParent(headRoot.transform, false);
+            cheekL.transform.localPosition = new Vector3(-0.13f, -0.05f, 0.04f);
+            cheekL.transform.localScale = new Vector3(0.18f, 0.16f, 0.18f);
+            Object.DestroyImmediate(cheekL.GetComponent<Collider>());
+            if (tabbyMat != null) cheekL.GetComponent<Renderer>().sharedMaterial = tabbyMat;
+
+            var cheekR = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            cheekR.name = "Cheek_R";
+            cheekR.transform.SetParent(headRoot.transform, false);
+            cheekR.transform.localPosition = new Vector3(0.13f, -0.05f, 0.04f);
+            cheekR.transform.localScale = new Vector3(0.18f, 0.16f, 0.18f);
+            Object.DestroyImmediate(cheekR.GetComponent<Collider>());
+            if (tabbyMat != null) cheekR.GetComponent<Renderer>().sharedMaterial = tabbyMat;
+
             var muzzle = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             muzzle.name = "Muzzle";
-            muzzle.transform.SetParent(head.transform, false);
-            muzzle.transform.localPosition = new Vector3(0f, -0.2f, 0.35f);
-            muzzle.transform.localScale = new Vector3(0.45f, 0.35f, 0.35f);
+            muzzle.transform.SetParent(headRoot.transform, false);
+            muzzle.transform.localPosition = new Vector3(0f, -0.06f, 0.14f);
+            muzzle.transform.localScale = new Vector3(0.18f, 0.13f, 0.13f);
             Object.DestroyImmediate(muzzle.GetComponent<Collider>());
-            if (whiteMat != null) muzzle.GetComponent<Renderer>().sharedMaterial = whiteMat;
+            if (pawMat != null) muzzle.GetComponent<Renderer>().sharedMaterial = pawMat;
 
-            // Feline Face Overlay
             var faceQuad = GameObject.CreatePrimitive(PrimitiveType.Quad);
             faceQuad.name = "FelineFaceOverlay";
-            faceQuad.transform.SetParent(head.transform, false);
-            faceQuad.transform.localPosition = new Vector3(0f, 0.05f, 0.48f);
-            faceQuad.transform.localRotation = Quaternion.identity;
-            faceQuad.transform.localScale = new Vector3(0.95f, 0.95f, 1f);
+            faceQuad.transform.SetParent(headRoot.transform, false);
+            faceQuad.transform.localPosition = new Vector3(0f, 0.01f, 0.185f);
+            faceQuad.transform.localScale = new Vector3(0.36f, 0.36f, 1f);
             Object.DestroyImmediate(faceQuad.GetComponent<Collider>());
             if (faceMat != null) faceQuad.GetComponent<Renderer>().sharedMaterial = faceMat;
 
-            // Ears
-            var earL = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            var earL = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             earL.name = "Ear_L";
-            earL.transform.SetParent(head.transform, false);
-            earL.transform.localPosition = new Vector3(-0.35f, 0.48f, -0.05f);
-            earL.transform.localRotation = Quaternion.Euler(15f, 0f, 32f);
-            earL.transform.localScale = new Vector3(0.2f, 0.38f, 0.15f);
+            earL.transform.SetParent(headRoot.transform, false);
+            earL.transform.localPosition = new Vector3(-0.11f, 0.15f, -0.02f);
+            earL.transform.localRotation = Quaternion.Euler(12f, 0f, 22f);
+            earL.transform.localScale = new Vector3(0.11f, 0.13f, 0.07f);
             Object.DestroyImmediate(earL.GetComponent<Collider>());
-            if (furMat != null) earL.GetComponent<Renderer>().sharedMaterial = furMat;
+            if (tabbyMat != null) earL.GetComponent<Renderer>().sharedMaterial = tabbyMat;
 
             var innerEarL = GameObject.CreatePrimitive(PrimitiveType.Quad);
             innerEarL.name = "InnerEar_L";
             innerEarL.transform.SetParent(earL.transform, false);
             innerEarL.transform.localPosition = new Vector3(0f, 0f, 0.52f);
-            innerEarL.transform.localScale = new Vector3(0.7f, 0.7f, 1f);
+            innerEarL.transform.localScale = new Vector3(0.65f, 0.65f, 1f);
             Object.DestroyImmediate(innerEarL.GetComponent<Collider>());
-            if (pinkMat != null) innerEarL.GetComponent<Renderer>().sharedMaterial = pinkMat;
+            if (earMat != null) innerEarL.GetComponent<Renderer>().sharedMaterial = earMat;
 
-            var earR = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            var earR = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             earR.name = "Ear_R";
-            earR.transform.SetParent(head.transform, false);
-            earR.transform.localPosition = new Vector3(0.35f, 0.48f, -0.05f);
-            earR.transform.localRotation = Quaternion.Euler(15f, 0f, -32f);
-            earR.transform.localScale = new Vector3(0.2f, 0.38f, 0.15f);
+            earR.transform.SetParent(headRoot.transform, false);
+            earR.transform.localPosition = new Vector3(0.11f, 0.15f, -0.02f);
+            earR.transform.localRotation = Quaternion.Euler(12f, 0f, -22f);
+            earR.transform.localScale = new Vector3(0.11f, 0.13f, 0.07f);
             Object.DestroyImmediate(earR.GetComponent<Collider>());
-            if (furMat != null) earR.GetComponent<Renderer>().sharedMaterial = furMat;
+            if (tabbyMat != null) earR.GetComponent<Renderer>().sharedMaterial = tabbyMat;
 
             var innerEarR = GameObject.CreatePrimitive(PrimitiveType.Quad);
             innerEarR.name = "InnerEar_R";
             innerEarR.transform.SetParent(earR.transform, false);
             innerEarR.transform.localPosition = new Vector3(0f, 0f, 0.52f);
-            innerEarR.transform.localScale = new Vector3(0.7f, 0.7f, 1f);
+            innerEarR.transform.localScale = new Vector3(0.65f, 0.65f, 1f);
             Object.DestroyImmediate(innerEarR.GetComponent<Collider>());
-            if (pinkMat != null) innerEarR.GetComponent<Renderer>().sharedMaterial = pinkMat;
+            if (earMat != null) innerEarR.GetComponent<Renderer>().sharedMaterial = earMat;
 
-            // Tail
-            var tailRoot = new GameObject("TailRoot");
-            tailRoot.transform.SetParent(visuals.transform, false);
-            tailRoot.transform.localPosition = new Vector3(0f, 0.1f, -0.42f);
-            tailRoot.transform.localRotation = Quaternion.Euler(45f, 0f, 0f);
+            // Princess Crown
+            var crownGO = new GameObject("PrincessCrown");
+            crownGO.transform.SetParent(headRoot.transform, false);
+            crownGO.transform.localPosition = new Vector3(0f, 0.15f, 0.01f);
+            crownGO.transform.localRotation = Quaternion.Euler(-6f, 0f, 0f);
+            crownGO.transform.localScale = Vector3.one * 0.95f;
+            if (crownMesh != null) crownGO.AddComponent<MeshFilter>().sharedMesh = crownMesh;
+            if (crownMat != null) crownGO.AddComponent<MeshRenderer>().sharedMaterial = crownMat;
 
-            var tail = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-            tail.name = "TailMesh";
-            tail.transform.SetParent(tailRoot.transform, false);
-            tail.transform.localPosition = new Vector3(0f, 0.15f, 0f);
-            tail.transform.localScale = new Vector3(0.06f, 0.18f, 0.06f);
-            Object.DestroyImmediate(tail.GetComponent<Collider>());
-            if (furMat != null) tail.GetComponent<Renderer>().sharedMaterial = furMat;
+            var rubyCenter = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            rubyCenter.name = "CrownRuby_Center";
+            rubyCenter.transform.SetParent(crownGO.transform, false);
+            rubyCenter.transform.localPosition = new Vector3(0f, 0.12f, 0.165f);
+            rubyCenter.transform.localScale = new Vector3(0.045f, 0.06f, 0.035f);
+            Object.DestroyImmediate(rubyCenter.GetComponent<Collider>());
+            if (rubyMat != null) rubyCenter.GetComponent<Renderer>().sharedMaterial = rubyMat;
 
-            // Four legs, each a hip pivot (rotated by CatCompanion's procedural trot gait) with a thin cylinder mesh
-            Transform legFrontLeft = BuildLeg(visuals.transform, "Leg_FrontLeft", new Vector3(-0.18f, -0.05f, 0.22f), furMat);
-            Transform legFrontRight = BuildLeg(visuals.transform, "Leg_FrontRight", new Vector3(0.18f, -0.05f, 0.22f), furMat);
-            Transform legBackLeft = BuildLeg(visuals.transform, "Leg_BackLeft", new Vector3(-0.18f, -0.05f, -0.22f), furMat);
-            Transform legBackRight = BuildLeg(visuals.transform, "Leg_BackRight", new Vector3(0.18f, -0.05f, -0.22f), furMat);
+            // Orb
+            var orb = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            orb.name = "ArcaneOrb";
+            orb.transform.SetParent(crownGO.transform, false);
+            orb.transform.localPosition = new Vector3(0f, 0.28f, 0f);
+            orb.transform.localScale = Vector3.one * 0.09f;
+            Object.DestroyImmediate(orb.GetComponent<Collider>());
+            if (missileMat != null) orb.GetComponent<Renderer>().sharedMaterial = missileMat;
 
-            so.FindProperty("frontLeftLeg").objectReferenceValue = legFrontLeft;
-            so.FindProperty("frontRightLeg").objectReferenceValue = legFrontRight;
-            so.FindProperty("backLeftLeg").objectReferenceValue = legBackLeft;
-            so.FindProperty("backRightLeg").objectReferenceValue = legBackRight;
+            // Quadruped Legs
+            Transform legFL = BuildChibiLeg(bodyRoot.transform, "Leg_FL", new Vector3(-0.12f, -0.03f, 0.13f), true, tabbyMat, pawMat);
+            Transform legFR = BuildChibiLeg(bodyRoot.transform, "Leg_FR", new Vector3(0.12f, -0.03f, 0.13f), true, tabbyMat, pawMat);
+            Transform legBL = BuildChibiLeg(bodyRoot.transform, "Leg_BL", new Vector3(-0.12f, -0.03f, -0.14f), false, tabbyMat, pawMat);
+            Transform legBR = BuildChibiLeg(bodyRoot.transform, "Leg_BR", new Vector3(0.12f, -0.03f, -0.14f), false, tabbyMat, pawMat);
+
+            so.FindProperty("frontLeftLeg").objectReferenceValue = legFL;
+            so.FindProperty("frontRightLeg").objectReferenceValue = legFR;
+            so.FindProperty("backLeftLeg").objectReferenceValue = legBL;
+            so.FindProperty("backRightLeg").objectReferenceValue = legBR;
+            so.FindProperty("castPoint").objectReferenceValue = orb.transform;
             so.ApplyModifiedPropertiesWithoutUndo();
+
+            // Long Multi-segment Tail
+            var tailSegmentsList = new Transform[4];
+            Transform parentTail = bodyRoot.transform;
+            Vector3 spawnPos = new Vector3(0f, 0.04f, -0.20f);
+            Quaternion spawnRot = Quaternion.Euler(38f, 0f, 0f);
+
+            for (int i = 0; i < 4; i++)
+            {
+                var seg = new GameObject("Tail_Seg" + i);
+                seg.transform.SetParent(parentTail, false);
+                seg.transform.localPosition = i == 0 ? spawnPos : new Vector3(0f, 0.11f, 0f);
+                seg.transform.localRotation = i == 0 ? spawnRot : Quaternion.Euler(6f, 0f, 0f);
+
+                var mesh = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+                mesh.name = "Mesh";
+                mesh.transform.SetParent(seg.transform, false);
+                mesh.transform.localPosition = new Vector3(0f, 0.055f, 0f);
+                float taper = 1f - (i * 0.16f);
+                mesh.transform.localScale = new Vector3(0.065f * taper, 0.055f, 0.065f * taper);
+                Object.DestroyImmediate(mesh.GetComponent<Collider>());
+                if (tabbyMat != null) mesh.GetComponent<Renderer>().sharedMaterial = (i == 3 && pawMat != null) ? pawMat : tabbyMat;
+
+                tailSegmentsList[i] = seg.transform;
+                parentTail = seg.transform;
+            }
 
             // Overhead Badge
             var overheadGO = new GameObject("OverheadFelineBadge");
             overheadGO.transform.SetParent(cat.transform, false);
-            overheadGO.transform.localPosition = new Vector3(0f, 0.95f, 0f);
+            overheadGO.transform.localPosition = new Vector3(0f, 0.90f, 0f);
             overheadGO.transform.localScale = Vector3.one * 0.45f;
             var sr = overheadGO.AddComponent<SpriteRenderer>();
             sr.sprite = iconSprite;
@@ -195,34 +264,55 @@ namespace DungeonCrawl.EditorTools
 
             var felineVisuals = cat.AddComponent<CatFelineVisuals>();
             var soVis = new SerializedObject(felineVisuals);
-            soVis.FindProperty("overheadIcon").objectReferenceValue = overheadGO.transform;
-            soVis.FindProperty("tailTransform").objectReferenceValue = tailRoot.transform;
+            soVis.FindProperty("bodyRoot").objectReferenceValue = bodyRoot.transform;
+            soVis.FindProperty("head").objectReferenceValue = headRoot.transform;
+            soVis.FindProperty("princessCrown").objectReferenceValue = crownGO.transform;
             soVis.FindProperty("leftEar").objectReferenceValue = earL.transform;
             soVis.FindProperty("rightEar").objectReferenceValue = earR.transform;
-            soVis.FindProperty("bodyTransform").objectReferenceValue = cat.transform;
+            soVis.FindProperty("legFL").objectReferenceValue = legFL;
+            soVis.FindProperty("legFR").objectReferenceValue = legFR;
+            soVis.FindProperty("legBL").objectReferenceValue = legBL;
+            soVis.FindProperty("legBR").objectReferenceValue = legBR;
+
+            var propTail = soVis.FindProperty("tailSegments");
+            propTail.arraySize = 4;
+            for (int i = 0; i < 4; i++)
+            {
+                propTail.GetArrayElementAtIndex(i).objectReferenceValue = tailSegmentsList[i];
+            }
+            soVis.FindProperty("overheadIcon").objectReferenceValue = overheadGO.transform;
             soVis.ApplyModifiedPropertiesWithoutUndo();
+            felineVisuals.CacheRestPoses();
 
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene);
             Debug.Log("Cat companion added to Dungeon scene, following " + player.name + " with Magic Missile spell ready.");
         }
 
-        /// <summary>Builds a hip pivot + thin cylinder leg mesh; the pivot's local rotation is what CatCompanion's procedural trot gait animates.</summary>
-        private static Transform BuildLeg(Transform parent, string name, Vector3 localHipPosition, Material furMat)
+        /// <summary>Builds a hip pivot + thigh cylinder + cream paw sock resting on the floor.</summary>
+        private static Transform BuildChibiLeg(Transform parent, string name, Vector3 hipPos, bool isFront, Material furMat, Material pawMat)
         {
-            var pivot = new GameObject(name);
-            pivot.transform.SetParent(parent, false);
-            pivot.transform.localPosition = localHipPosition;
+            var hip = new GameObject(name);
+            hip.transform.SetParent(parent, false);
+            hip.transform.localPosition = hipPos;
 
-            var mesh = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-            mesh.name = "LegMesh";
-            mesh.transform.SetParent(pivot.transform, false);
-            mesh.transform.localPosition = new Vector3(0f, -0.18f, 0f);
-            mesh.transform.localScale = new Vector3(0.08f, 0.18f, 0.08f);
-            Object.DestroyImmediate(mesh.GetComponent<Collider>());
-            if (furMat != null) mesh.GetComponent<Renderer>().sharedMaterial = furMat;
+            var thigh = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            thigh.name = "Thigh";
+            thigh.transform.SetParent(hip.transform, false);
+            thigh.transform.localPosition = new Vector3(0f, -0.09f, 0f);
+            thigh.transform.localScale = new Vector3(0.085f, 0.09f, 0.085f);
+            Object.DestroyImmediate(thigh.GetComponent<Collider>());
+            if (furMat != null) thigh.GetComponent<Renderer>().sharedMaterial = furMat;
 
-            return pivot.transform;
+            var paw = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            paw.name = "Paw";
+            paw.transform.SetParent(hip.transform, false);
+            paw.transform.localPosition = new Vector3(0f, -0.22f, isFront ? 0.03f : 0.02f);
+            paw.transform.localScale = new Vector3(0.10f, 0.065f, 0.12f);
+            Object.DestroyImmediate(paw.GetComponent<Collider>());
+            if (pawMat != null) paw.GetComponent<Renderer>().sharedMaterial = pawMat;
+
+            return hip.transform;
         }
     }
 }

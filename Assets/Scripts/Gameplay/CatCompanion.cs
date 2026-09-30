@@ -82,10 +82,25 @@ public class CatCompanion : MonoBehaviour
     public bool CanCast => Time.time >= _nextCastTime && !_isCasting;
     public bool AutoCast { get => autoCast; set => autoCast = value; }
     public Transform CurrentTarget => _currentTarget;
+    public bool IsCasting => _isCasting;
+    public Vector3 PlanarVelocity => _planarVelocity;
+    public float CurrentSpeed => _planarVelocity.magnitude;
+    public float WalkSpeed => walkSpeed;
+    public float RunSpeed => runSpeed;
 
     private void Awake()
     {
         _controller = GetComponent<CharacterController>();
+        if (_controller == null)
+        {
+            _controller = gameObject.AddComponent<CharacterController>();
+            _controller.height = 0.6f;
+            _controller.radius = 0.28f;
+            _controller.center = new Vector3(0f, 0.3f, 0f);
+            _controller.stepOffset = 0.3f;
+            _controller.minMoveDistance = 0.001f;
+        }
+
         if (animator == null)
         {
             animator = GetComponentInChildren<Animator>();
@@ -198,8 +213,15 @@ public class CatCompanion : MonoBehaviour
         }
 
         // real gravity + ground snapping via CharacterController instead of a fixed floating height
-        _verticalVelocity = _controller.isGrounded ? -1f : _verticalVelocity + gravity * Time.deltaTime;
-        _controller.Move((_planarVelocity + Vector3.up * _verticalVelocity) * Time.deltaTime);
+        if (_controller != null)
+        {
+            _verticalVelocity = _controller.isGrounded ? -1f : _verticalVelocity + gravity * Time.deltaTime;
+            _controller.Move((_planarVelocity + Vector3.up * _verticalVelocity) * Time.deltaTime);
+        }
+        else
+        {
+            transform.position += _planarVelocity * Time.deltaTime;
+        }
 
         UpdateGait(_planarVelocity.magnitude);
     }
