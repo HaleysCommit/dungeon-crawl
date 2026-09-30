@@ -1,0 +1,11 @@
+Model Information:
+* title:	Snarling Goblin Fighter [RapidAssets]
+* source:	https://sketchfab.com/3d-models/snarling-goblin-fighter-rapidassets-a4f7392d59c14d27a8836888eae4769b
+* author:	RapidAssets (https://sketchfab.com/RapidAssets)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Snarling Goblin Fighter [RapidAssets]" (https://sketchfab.com/3d-models/snarling-goblin-fighter-rapidassets-a4f7392d59c14d27a8836888eae4769b) by RapidAssets (https://sketchfab.com/RapidAssets) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

@@ -43,3 +43,11 @@ backend REST API used by the project's web frontend — see the main
 4. Point `SessionApiClient` at your running backend (see the main repo's `backend/`
    setup instructions).
 5. Open `Assets/Scenes/Splash.unity` and press Play.
+
+## Credits
+
+- "Snarling Goblin Fighter" (`Assets/Art/Goblin/`) is based on
+  ["Snarling Goblin Fighter [RapidAssets]"](https://sketchfab.com/3d-models/snarling-goblin-fighter-rapidassets-a4f7392d59c14d27a8836888eae4769b)
+  by [RapidAssets](https://sketchfab.com/RapidAssets), licensed under
+  [CC BY 4.0](http://creativecommons.org/licenses/by/4.0/).
+
