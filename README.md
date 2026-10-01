@@ -46,8 +46,7 @@ backend REST API used by the project's web frontend — see the main
 
 ## Credits
 
-- "Snarling Goblin Fighter" (`Assets/Art/Goblin/`) is based on
-  ["Snarling Goblin Fighter [RapidAssets]"](https://sketchfab.com/3d-models/snarling-goblin-fighter-rapidassets-a4f7392d59c14d27a8836888eae4769b)
-  by [RapidAssets](https://sketchfab.com/RapidAssets), licensed under
-  [CC BY 4.0](http://creativecommons.org/licenses/by/4.0/).
+- Goblin enemy model (`Assets/goblin/`) is the "Goblin" character pack by
+  [Aleksey Kozhemyakin](https://assetstore.unity.com/packages/3d/characters/humanoids/fantasy/goblin-61823)
+  (Unity Asset Store, Standard Unity Asset Store EULA).
 

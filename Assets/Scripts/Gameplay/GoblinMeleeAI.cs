@@ -31,9 +31,20 @@ namespace DungeonCrawl.Gameplay
         [SerializeField] private float attackCooldown = 1.4f;
         [SerializeField] private float attackWindup = 0.35f;
         [SerializeField] private float damage = 8f;
-        [Tooltip("Optional weapon arm bone to swing during the attack windup.")]
+        [Tooltip("Optional weapon arm bone to swing during the attack windup. Ignored if an Animator is assigned.")]
         [SerializeField] private Transform weaponArm;
         [SerializeField] private AudioClip attackSound;
+
+        [Header("Animation")]
+        [Tooltip("Drives Speed/Attack/AttackIndex/Hit/Dead parameters if assigned (see GoblinAnimatorSetup).")]
+        [SerializeField] private Animator animator;
+        [SerializeField] private int attackVariantCount = 3;
+
+        private static readonly int SpeedParam = Animator.StringToHash("Speed");
+        private static readonly int AttackParam = Animator.StringToHash("Attack");
+        private static readonly int AttackIndexParam = Animator.StringToHash("AttackIndex");
+        private static readonly int HitParam = Animator.StringToHash("Hit");
+        private static readonly int DeadParam = Animator.StringToHash("Dead");
 
         private CharacterController _controller;
         private Health _health;
@@ -53,6 +64,34 @@ namespace DungeonCrawl.Gameplay
             {
                 _weaponArmRestRotation = weaponArm.localRotation;
             }
+            if (animator == null)
+            {
+                animator = GetComponentInChildren<Animator>();
+            }
+            if (_health != null)
+            {
+                _health.OnHit += HandleHit;
+                _health.OnDeath += HandleDeath;
+            }
+        }
+
+        private void OnDestroy()
+        {
+            if (_health != null)
+            {
+                _health.OnHit -= HandleHit;
+                _health.OnDeath -= HandleDeath;
+            }
+        }
+
+        private void HandleHit()
+        {
+            animator?.SetTrigger(HitParam);
+        }
+
+        private void HandleDeath()
+        {
+            animator?.SetTrigger(DeadParam);
         }
 
         private void Start()
@@ -117,6 +156,8 @@ namespace DungeonCrawl.Gameplay
 
             _verticalVelocity = _controller.isGrounded ? -1f : _verticalVelocity + gravity * Time.deltaTime;
             _controller.Move((_planarVelocity + Vector3.up * _verticalVelocity) * Time.deltaTime);
+
+            animator?.SetFloat(SpeedParam, _planarVelocity.magnitude);
         }
 
         private IEnumerator AttackRoutine()
@@ -125,7 +166,13 @@ namespace DungeonCrawl.Gameplay
             _nextAttackTime = Time.time + attackCooldown;
             _planarVelocity = Vector3.zero;
 
-            if (weaponArm != null)
+            if (animator != null)
+            {
+                animator.SetInteger(AttackIndexParam, Random.Range(0, attackVariantCount));
+                animator.SetTrigger(AttackParam);
+                yield return new WaitForSeconds(attackWindup);
+            }
+            else if (weaponArm != null)
             {
                 float elapsed = 0f;
                 while (elapsed < attackWindup)

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: ace3825f63ad4ec4884ad9c4d4ad2edf
+timeCreated: 1565803018
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 61823
+  packageName: Goblin
+  packageVersion: 1.0
+  assetPath: Assets/goblin/Scenes/Cube.mat
+  uploadId: 325919

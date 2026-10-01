@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 0cbe41442a8a48143b4f13f49bf5565d
+timeCreated: 1458503419
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 61823
+  packageName: Goblin
+  packageVersion: 1.0
+  assetPath: Assets/goblin/Materials/goblin/M_goblin.mat
+  uploadId: 325919
